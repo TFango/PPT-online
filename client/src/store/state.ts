@@ -1,4 +1,4 @@
-import { onValue, ref } from "firebase/database";
+import { onValue, ref, update, get } from "firebase/database";
 import { db } from "../services/firebase";
 
 type Move = "piedra" | "papel" | "tijera"; //Definje los movimiento validos del juego
@@ -24,7 +24,7 @@ type RtdbGame = {
 };
 
 type Score = { me: number; opponent: number }; // Estructura para llevar el puntaje
-const GAME_KEY = "date";
+const GAME_KEY = "game-state";
 
 export const state = {
   // Exporta el objeto de estado principal
@@ -38,7 +38,6 @@ export const state = {
 
     rtdbData: {
       // Datos de la base de datos en tiempo real
-      players: {} as Record<string, RtdbPlayer>, // Jugadores
       game: {} as RtdbGame, // Estado del juego
     },
 
@@ -120,7 +119,7 @@ export const state = {
       opponentChoice: opponentChoice, // Eleccion del oponente
     });
   },
-  async listernRTDB() {
+  async listenRTDB() {
     // Escucha cambios en la base de datos en tiempo real
     const cs = this.getState();
     const roomId = cs.roomIdReal; // Toma el ID de la sala
@@ -129,7 +128,7 @@ export const state = {
       console.error("No hay roomIdReal. No se puede escuchar la RTDB");
     }
 
-    const roomRef = ref(db, "rooms/" + roomId + "/currentGame"); // Crea referencia a la unicacion en la base de datos
+    const roomRef = ref(db, "rooms/" + roomId + "/currentGame"); // Crea referencia a la ubicacion en la base de datos
 
     onValue(roomRef, (snapshot) => {
       // Escucha cambios en esa ubicacion
@@ -140,7 +139,6 @@ export const state = {
       this.setState({
         //Actualiza el estado con los datos nuevos
         rtdbData: {
-          players: data.players || {}, // Datos de jugadores
           game: data || {}, // Datos del juego
         },
       });
@@ -148,13 +146,15 @@ export const state = {
       this.computeDerivedData(); // Recalcula datos derivados con la nueva informacion
     });
   },
-  async createRoom(userName: string) { // Crea una nueva sala de juego
+  async createRoom(userName: string) {
+    // Crea una nueva sala de juego
     if (!userName) {
       console.error("createRoom llamado sin nombre");
       throw new Error("Nombre requerido");
     }
 
-    const res = await fetch("/api/createRoom", { // Envia solicitud al servidor para crear sala
+    const res = await fetch("/api/createRoom", {
+      // Envia solicitud al servidor para crear sala
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userName }),
@@ -166,7 +166,8 @@ export const state = {
 
     const data = await res.json(); // Convierte la respuesta a JSON
 
-    this.setState({ // Actualiza el estado con los datos de la nueva sala
+    this.setState({
+      // Actualiza el estado con los datos de la nueva sala
       userName,
       userId: data.userId,
       roomIdReal: data.roomIdReal,
@@ -174,13 +175,15 @@ export const state = {
       owner: true,
     });
   },
-  async joinRoom(roomCode: string, userName: string) { // Une a un usuario a una sala existente
+  async joinRoom(roomCode: string, userName: string) {
+    // Une a un usuario a una sala existente
     if (!roomCode || !userName) {
       console.error("faltan datos en joinRoom");
       throw new Error("roomCode y userName requeridos");
     }
 
-    const res = await fetch("/api/joinRoom", { // Envia solicitud para unirse a la sala
+    const res = await fetch("/api/joinRoom", {
+      // Envia solicitud para unirse a la sala
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roomCode, userName }),
@@ -192,17 +195,145 @@ export const state = {
 
     const data = await res.json();
 
-    if (!data.userId || !data.roomIdReal || !data.roomIdCorto) { // Verifica que la respuesta tenga los datos necesarios
+    if (!data.userId || !data.roomIdReal || !data.roomIdCorto) {
+      // Verifica que la respuesta tenga los datos necesarios
       console.error("joinRoom: respuesta invalida del backend: ", data);
       throw new Error("Respuesta invalida del servidor");
     }
 
-    this.setState({ // Actualiza el estado con los datos de la sala
+    this.setState({
+      // Actualiza el estado con los datos de la sala
       userName,
       userId: data.userId,
       roomIdReal: data.roomIdReal,
       roomIdCorto: data.roomIdCorto,
       owner: false,
     });
+  },
+  async sendStartSignal() {
+    // Envia una señal de "estoy listo para jugar" a la base de datos
+    const cs = this.getState();
+    const userId = cs.userId;
+    const roomIdReal = cs.roomIdReal;
+
+    if (!userId || !roomIdReal) {
+      console.error("sendStartSignal: faltan userId o roomIdReal");
+      return;
+    }
+
+    const playerRef = ref(db, `rooms/${roomIdReal}/currentGame/${userId}`); // Crea la referencia a mi ubicacion en la base de datos
+
+    try {
+      await update(playerRef, {
+        // Actualiza la base de datos para indicar que estoy listo
+        start: true,
+      });
+      console.log(`start=true seteado para ${userId}`);
+    } catch (err) {
+      console.error("Error al enviar start:", err);
+      throw err;
+    }
+  },
+  async sendChoice(choice: Move) {
+    const cs = this.getState();
+    const userId = cs.userId;
+    const roomIdReal = cs.roomIdReal;
+
+    if (!userId || !roomIdReal) {
+      console.error("sendChoice: faltan userId o roomIdReal");
+      return;
+    }
+
+    if (!choice) {
+      console.error("sendChoice: falta choice");
+      return;
+    }
+
+    const playerRef = ref(db, `rooms/${roomIdReal}/currentGame/${userId}`);
+
+    try {
+      await update(playerRef, {
+        choice,
+      });
+      console.log(`choice=${choice} enviada para user=${userId}`);
+    } catch (err) {
+      console.error("Error al enviar choice:", err);
+      throw err;
+    }
+  },
+  async resetGame() {
+    // Reinicia el juego para una nueva ronda
+    const cs = this.getState();
+    const roomIdReal = cs.roomIdReal;
+
+    if (!roomIdReal) {
+      console.error("resetGame: falta roomIdReal");
+      return;
+    }
+
+    const currentGameRef = ref(db, `rooms/${roomIdReal}/currentGame`); // Crea referencia al juego actual en la base de datos
+    const snapshot = await get(currentGameRef); // Obtiene los datos actuales del juego
+
+    if (!snapshot.exists()) {
+      // Verifica si existe el juego
+      console.warn("resetGame: no hay currentGame para resetear");
+      return;
+    }
+
+    const players = snapshot.val(); // Convierte los datos a objeto Javascript
+
+    for (const [playerId, playerData] of Object.entries(players)) {
+      // Recorre TODOS los jugadores del juego
+      const playerRef = ref(db, `rooms/${roomIdReal}/currentGame/${playerId}`); // Crea referencia a cada jugador individual
+
+      try {
+        await update(playerRef, {
+          // Resetea el estado del jugador
+          choice: "",
+          start: false,
+        });
+      } catch (err) {
+        console.error(`Error al resetear al jugador ${playerId}: `, err);
+      }
+    }
+    console.log("resetGame: ronda reiniciada correctamente.");
+  },
+  async saveMatchResult() {
+    // Guarda el resultado de la partida en el servidor
+    const cs = this.getState();
+    const roomIdReal = cs.roomIdReal;
+    const userChoice = cs.currentChoice;
+    const opponentChoice = cs.opponentChoice;
+
+    if (!roomIdReal || !userChoice || !opponentChoice) {
+      console.error("saveMatchResult: faltan datos");
+      return;
+    }
+
+    const res = await fetch("/api/resultMoves", {
+      // Envia el resultado al servidor
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roomIdReal, userChoice, opponentChoice }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP Error: ${res.status}`);
+    }
+
+    const data = await res.json();
+    const newScore = data.score; // Toma el nuevo puntaje
+
+    if (!newScore) {
+      console.error("saveMatchResult: score inválido del backend:", data);
+      return;
+    }
+
+    this.setState({
+      // Actualiza el estado local con el nuevo puntaje
+      score: newScore,
+    });
+
+    console.log("Nuevo score guardado:", newScore);
   },
 };

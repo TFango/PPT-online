@@ -1,0 +1,18 @@
+.logos {
+  margin-top: 15px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(24px, 8vw, 80px);
+}
+
+@media (min-width: 1278px) {
+  .logos {
+    gap: 100px;
+  }
+}
+
+.logo {
+  width: clamp(70px, 9vw, 120px);
+  height: clamp(120px, 12vw, 160px);
+}

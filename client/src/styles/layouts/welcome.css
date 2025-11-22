@@ -1,0 +1,25 @@
+.main {
+  display: flex;
+  justify-content: center;
+}
+
+.main__container {
+  width: 85%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+
+.main__buttons {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.main__logos {
+  display: flex;
+  gap: 46px;
+}  

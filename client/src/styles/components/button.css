@@ -1,0 +1,14 @@
+.btn {
+  font-family: Merriweather;
+  height: 70px;
+  background-color: rgba(0, 108, 252, 1);
+  border: 10px rgba(0, 25, 151, 1) solid;
+  margin-bottom: 20px;
+  color: rgba(216, 252, 252, 1);
+  font-size: 20px;
+} 
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

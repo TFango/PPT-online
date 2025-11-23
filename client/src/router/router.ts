@@ -1,9 +1,11 @@
 import { welcomePage } from "../pages/welcomePage";
+import { namePage } from "../pages/namePage";
 
 const routes: Record<string, (root: HTMLElement) => void> = {
   // Objeto que mapea rutas a funciones que renderizan paginas
   // Aqui iran las rutas a la page
   "/": welcomePage,
+  "/namePage": namePage,
 };
 
 const root = document.getElementById("app")!; // Obtiene el elemento contenedor principal de la app

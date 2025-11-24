@@ -13,8 +13,9 @@ export function welcomePage(root: HTMLElement) {
   const slotTitle = view.querySelector<HTMLDivElement>("#slot-title");
   if (slotTitle) {
     const startTile = createTitle({
-      text: "Piedra papel o Tijera",
+      text: "Piedra Papel o Tijera",
       id: "slotTile",
+      className: "tb-desing"
     });
     slotTitle.replaceWith(startTile.el);
   }

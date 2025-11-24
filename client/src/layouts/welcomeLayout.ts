@@ -3,8 +3,8 @@ import "../styles/layouts/welcome.css";
 export function welcomeLayout() {
   const div = document.createElement("div");
   div.innerHTML = `
-<main class="main">
-      <div class="main__container">
+<main class="welcome-main">
+      <div class="welcome-main__container">
         <div id="slot-title"></div>
 
         <section class="main__buttons">

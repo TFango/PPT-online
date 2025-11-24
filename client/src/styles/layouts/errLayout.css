@@ -1,0 +1,36 @@
+.err-main {
+  display: flex;
+  justify-content: center;
+}
+
+.err-main__container {
+  width: 85%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 767px) {
+  .err-main__container {
+    width: 70%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.err-main__description {
+  font-family: Merriweather;
+  font-size: 25px;
+  margin: 21px;
+}
+
+@media (min-width: 767px) {
+  .err-main__description {
+    font-family: Merriweather;
+    font-size: 40px;
+    margin: 40px 0px 25px 0px;
+  }
+}

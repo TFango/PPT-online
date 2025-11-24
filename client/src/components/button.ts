@@ -1,6 +1,7 @@
 export type ButtonProps = {
   text: string;
   id?: string;
+  className?: string;
   disabled?: boolean;
 };
 
@@ -10,6 +11,7 @@ export function createButton(props: ButtonProps, onClick?: () => void) {
   btn.classList.add("btn");
 
   if (props.id) btn.id = props.id;
+  if (props.className) btn.classList.add(props.className);
   btn.textContent = props.text;
   btn.disabled = !!props.disabled;
 

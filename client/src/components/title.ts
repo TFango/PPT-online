@@ -1,6 +1,7 @@
 export type TitleProps = {
   text: string;
   id?: string;
+  className?: string;
 };
 
 export function createTitle(props: TitleProps) {
@@ -9,6 +10,7 @@ export function createTitle(props: TitleProps) {
   title.classList.add("main__title");
 
   if (props.id) title.id = props.id;
+  if (props.className) title.classList.add(props.className);
   title.textContent = props.text;
 
   const setText = (text: string) => (title.textContent = text);

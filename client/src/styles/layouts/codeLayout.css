@@ -1,9 +1,9 @@
-.welcome-main {
+.code-main {
   display: flex;
   justify-content: center;
 }
 
-.welcome-main__container {
+.code-main__container {
   width: 85%;
   height: 100dvh;
   display: flex;
@@ -12,13 +12,7 @@
 }
 
 @media (min-width: 767px) {
-  .tb-desing {
-    text-align: left;
-  }
-}
-
-@media (min-width: 767px) {
-  .welcome-main__container {
+  .code-main__container {
     width: 70%;
     height: 100dvh;
     display: flex;
@@ -28,7 +22,7 @@
 }
 
 @media (min-width: 1023px) {
-  .welcome-main__container {
+  .code-main__container {
   width: 50%;
   height: 100dvh;
   display: flex;
@@ -37,22 +31,34 @@
 }
 }
 
-.main__buttons {
+.code-main__buttons {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
+.code-form {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 @media (min-width: 767px) {
-  .main__buttons {
+  .code-form {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 15px;
   }
 }
 
-.main__logos {
-  display: flex;
-  gap: 46px;
+.code-input {
+  height: 60px;
+  width: 100%;
+  font-size: 24px;
+  font-family: Merriweather;
+  text-align: center;
+  border: 5px rgba(24, 36, 96, 1) solid;
+  margin-bottom: 20px;
+  border-radius: 10px;
 }

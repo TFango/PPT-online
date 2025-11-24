@@ -1,0 +1,134 @@
+.lb-header {
+  display: flex;
+  justify-content: center;
+}
+
+.lb-header__container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 10px 0 10px;
+}
+
+@media (min-width: 767px) {
+  .lb-header__container {
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 10px 0 10px;
+  }
+}
+
+p {
+  margin: 0px;
+}
+
+.lb-score__user {
+  font-family: Merriweather;
+  color: rgba(0, 0, 0, 1);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+@media (min-width: 767px) {
+  .lb-score__user {
+    font-family: Merriweather;
+    color: rgba(0, 0, 0, 1);
+    font-weight: 600;
+    font-size: 24px;
+  }
+}
+
+.lb-score__oponent {
+  font-family: Merriweather;
+  color: rgba(255, 100, 66, 1);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+@media (min-width: 767px) {
+  .lb-score__oponent {
+    font-family: Merriweather;
+    color: rgba(255, 100, 66, 1);
+    font-weight: 600;
+    font-size: 24px;
+  }
+}
+
+.lb-sala {
+  text-align: right;
+}
+
+.lb-sala__description {
+  font-family: Merriweather;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+@media (min-width: 767px) {
+  .lb-sala__description {
+    font-family: Merriweather;
+    font-weight: 700;
+    font-size: 24px;
+  }
+}
+
+.lb-sala__description-name {
+  font-family: Merriweather;
+  font-weight: 400;
+  font-size: 15px;
+}
+
+@media (min-width: 767px) {
+  .lb-sala__description-name {
+    font-family: Merriweather;
+    font-weight: 400;
+    font-size: 24px;
+  }
+}
+
+.lb-main {
+  display: flex;
+  justify-content: center;
+}
+
+.lb-main__container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: calc(100dvh - 46px);
+}
+
+@media (min-width: 767px) {
+  .lb-main__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: calc(100dvh - 71px);
+  }
+}
+
+.lb-main__description {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+
+  margin-top: auto;
+}
+
+.description {
+  font-family: Merriweather;
+  margin: 0px;
+}
+
+.nocode {
+  font-weight: 200;
+  font-size: 25px;
+}
+
+.code {
+  font-weight: 800;
+  font-size: 35px;
+}

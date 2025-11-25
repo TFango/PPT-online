@@ -1,0 +1,16 @@
+.move-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.move-icon__img {
+  height: clamp(180px, 50vh, 260px);
+  width: auto;
+  display: block;
+}
+
+/* Si querés girar la del oponente */
+.move-icon.opponent .move-icon__img {
+  transform: rotate(180deg);
+}

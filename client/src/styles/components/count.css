@@ -1,0 +1,10 @@
+.count {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.count-svg {
+  width: clamp(180px, 55vw, 300px);
+  height: auto;
+}

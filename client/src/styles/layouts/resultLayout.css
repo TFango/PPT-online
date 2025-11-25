@@ -1,0 +1,51 @@
+.r-main {
+  display: flex;
+  justify-content: center;
+}
+
+.result--win {
+  background-color: rgba(88, 99, 78, 0.692);
+}
+
+.result--lose {
+  background-color: rgba(137, 73, 73, 0.692);
+}
+
+.r-main__container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100dvh;
+  gap: 40px;
+}
+.r-main__star {
+  height: auto;
+  width: auto;
+  margin-top: 20px;
+}
+
+.r-main__score {
+  border: 10px rgba(0, 0, 0, 1) solid;
+  background-color: rgba(255, 255, 255, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.r-main__title {
+  font-family: Merriweather;
+  font-size: 40px;
+  margin: 5px 0px 0px 0px;
+}
+
+.description {
+  align-self: flex-end;
+  font-family: Merriweather;
+  font-size: 20px;
+}
+.r-main__opponent {
+  margin-top: 10px;
+}
+

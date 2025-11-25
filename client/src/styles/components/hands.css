@@ -1,0 +1,41 @@
+.h-logos {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(24px, 8vw, 100px);
+}
+
+/* .move.h-logo {
+  width: clamp(70px, 9vw, 120px);
+  height: clamp(130px, 14vw, 180px);
+} */
+
+.move.h-logo {
+  height: 160px;
+  width: auto;
+  flex: 0 0 auto;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
+  transform-origin: center bottom;
+}
+
+.moves.has-selected .h-logo {
+  filter: grayscale(1);
+  opacity: 0.5;
+  transform: scale(0.9);
+}
+
+.moves.has-selected .h-logo.is-selected {
+  filter: none;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* .move.h-logo.selected {
+  transform: scale(1.2);
+}
+.h-logo.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+} */

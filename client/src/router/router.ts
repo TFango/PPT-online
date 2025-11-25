@@ -3,6 +3,12 @@ import { namePage } from "../pages/namePage";
 import { codePage } from "../pages/codePage";
 import { errPage } from "../pages/errPage";
 import { lobbyPage } from "../pages/lobbyPage";
+import { state } from "../store/state";
+import { waitingPage } from "../pages/waitingPage";
+import { playPage } from "../pages/playPage";
+import { wachIconPage } from "../pages/wachIconPage";
+import { resultPage } from "../pages/resultPage";
+import { instructionPage } from "../pages/instructionPage";
 
 const routes: Record<string, (root: HTMLElement) => void> = {
   // Objeto que mapea rutas a funciones que renderizan paginas
@@ -12,6 +18,22 @@ const routes: Record<string, (root: HTMLElement) => void> = {
   "/codePage": codePage,
   "/errPage": errPage,
   "/lobbyPage": lobbyPage,
+  "/waitingPage": waitingPage,
+  "/playPage": playPage,
+  "/wachIconPage": wachIconPage,
+  "/resultPage": resultPage,
+  "/instructionPage": instructionPage,
+};
+
+routes["/debug-resultPage"] = (root) => {
+  state.setState({
+    userName: "PruebaUser",
+    opponentName: "PruebaOponente",
+    score: { me: 1, opponent: 3 },
+    roomIdCorto: "AB12CD",
+    winner: "me",
+  });
+  return resultPage(root);
 };
 
 const root = document.getElementById("app")!; // Obtiene el elemento contenedor principal de la app

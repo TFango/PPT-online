@@ -1,26 +1,20 @@
-import { lobbyLayout } from "../layouts/lobbyLayout";
+import { waitingLayout } from "../layouts/waitingLayout";
 import { goTo } from "../router/router";
-import { createLogos } from "../components/logos";
-import { createHeader } from "../components/header";
 import { state } from "../store/state";
+import { createHeader } from "../components/header";
+import { createLogos } from "../components/logos";
 
-export function lobbyPage(root: HTMLElement) {
+export function waitingPage(root: HTMLElement) {
   root.innerHTML = "";
   const cs = state.getState();
 
-  const view = lobbyLayout();
+  const view = waitingLayout();
   root.appendChild(view);
 
-  const code = view.querySelector("#code") as HTMLParagraphElement;
-  code.textContent = cs.roomIdCorto;
-
-  const slotLogos = view.querySelector<HTMLDivElement>("#slot-logos");
-  if (slotLogos) {
-    const startLogos = createLogos();
-    slotLogos.replaceWith(startLogos.el);
-  }
-
   let startHeader: ReturnType<typeof createHeader> | null = null;
+
+  const nameEl = view.querySelector("#name") as HTMLParagraphElement;
+  nameEl.textContent = cs.opponentName;
 
   const slotHeader = view.querySelector<HTMLDivElement>("#slot-header");
   if (slotHeader) {
@@ -34,6 +28,12 @@ export function lobbyPage(root: HTMLElement) {
     slotHeader.replaceWith(startHeader.el);
   }
 
+  const slotLogos = view.querySelector<HTMLDivElement>("#slot-logos");
+  if (slotLogos) {
+    const startLogos = createLogos();
+    slotLogos.replaceWith(startLogos.el);
+  }
+
   state.subscribe(() => {
     if (!startHeader) return;
 
@@ -42,10 +42,9 @@ export function lobbyPage(root: HTMLElement) {
     startHeader.updateScore(newCs.score.me, newCs.score.opponent);
     startHeader.updateSala(newCs.roomIdCorto);
     startHeader.updateOpponentName(newCs.opponentName);
-    code.textContent = newCs.roomIdCorto;
   });
 
   setTimeout(() => {
-    goTo("/instructionPage");
+    goTo("/playPage");
   }, 2000);
 }

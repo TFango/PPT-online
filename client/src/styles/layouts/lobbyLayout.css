@@ -1,92 +1,3 @@
-.lb-header {
-  display: flex;
-  justify-content: center;
-}
-
-.lb-header__container {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  margin: 10px 10px 0 10px;
-}
-
-@media (min-width: 767px) {
-  .lb-header__container {
-    width: 70%;
-    display: flex;
-    justify-content: space-between;
-    margin: 10px 10px 0 10px;
-  }
-}
-
-p {
-  margin: 0px;
-}
-
-.lb-score__user {
-  font-family: Merriweather;
-  color: rgba(0, 0, 0, 1);
-  font-weight: 600;
-  font-size: 15px;
-}
-
-@media (min-width: 767px) {
-  .lb-score__user {
-    font-family: Merriweather;
-    color: rgba(0, 0, 0, 1);
-    font-weight: 600;
-    font-size: 24px;
-  }
-}
-
-.lb-score__oponent {
-  font-family: Merriweather;
-  color: rgba(255, 100, 66, 1);
-  font-weight: 600;
-  font-size: 15px;
-}
-
-@media (min-width: 767px) {
-  .lb-score__oponent {
-    font-family: Merriweather;
-    color: rgba(255, 100, 66, 1);
-    font-weight: 600;
-    font-size: 24px;
-  }
-}
-
-.lb-sala {
-  text-align: right;
-}
-
-.lb-sala__description {
-  font-family: Merriweather;
-  font-weight: 700;
-  font-size: 15px;
-}
-
-@media (min-width: 767px) {
-  .lb-sala__description {
-    font-family: Merriweather;
-    font-weight: 700;
-    font-size: 24px;
-  }
-}
-
-.lb-sala__description-name {
-  font-family: Merriweather;
-  font-weight: 400;
-  font-size: 15px;
-}
-
-@media (min-width: 767px) {
-  .lb-sala__description-name {
-    font-family: Merriweather;
-    font-weight: 400;
-    font-size: 24px;
-  }
-}
-
 .lb-main {
   display: flex;
   justify-content: center;
@@ -118,7 +29,7 @@ p {
   margin-top: auto;
 }
 
-.description {
+.lb-description {
   font-family: Merriweather;
   margin: 0px;
 }

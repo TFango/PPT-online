@@ -31,6 +31,7 @@ export const state = {
   data: {
     userName: "",
     userId: "",
+    opponentName: "",
     roomIdReal: "",
     roomIdCorto: "",
 
@@ -62,6 +63,7 @@ export const state = {
 
       this.data.userName = parsed.userName || "";
       this.data.userId = parsed.userId || "";
+      this.data.opponentName = parsed.opponentName || "";
       this.data.roomIdReal = parsed.roomIdReal || "";
       this.data.roomIdCorto = parsed.roomIdCorto || "";
       this.data.owner = parsed.owner || false;
@@ -84,6 +86,7 @@ export const state = {
       // Prepara los datos que se guardaran permanentemente
       userName: this.data.userName,
       userId: this.data.userId,
+      opponentName: this.data.opponentName,
       roomIdReal: this.data.roomIdReal,
       roomIdCorto: this.data.roomIdCorto,
       owner: this.data.owner,
@@ -110,6 +113,7 @@ export const state = {
     const players = cs.rtdbData.game; // Obtiene los datos del juegador
 
     const opponentId = Object.keys(players).find((id) => id !== myId); // Encuentra el ID del oponente (el que no sea yo)
+    const opponentName = opponentId ? players[opponentId]?.name || "" : "";
 
     const opponentChoice = opponentId ? players[opponentId]?.choice || "" : ""; // Obtiene la eleccion del oponente si existe
 
@@ -117,6 +121,7 @@ export const state = {
       // Actualiza el estado con las elecciones
       currentChoice: players[myId]?.choice || "", // Mi eleccion
       opponentChoice: opponentChoice, // Eleccion del oponente
+      opponentName,
     });
   },
   async listenRTDB() {

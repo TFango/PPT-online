@@ -1,7 +1,8 @@
-export function createCount() {
+export function createCount() { // Creo un contador visual con círculo que se vacía
   const wrap = document.createElement("div");
   wrap.className = "count";
-
+  
+  // SVG con círculo y texto
   wrap.innerHTML = `
   <svg viewBox="0 0 200 200" class="count-svg">
     <circle cx="100" cy="100" r="80"

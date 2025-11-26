@@ -18,7 +18,7 @@ export async function createRoom(req: Request, res: Response) {
 
   try {
     // Crea el documento de la sala en Firestore
-    await roomCollection.doc(roomIdReal).set({
+    await roomCollection.doc(roomIdCorto).set({
       owner: userName,
       roomIdReal,
       roomIdCorto,
@@ -59,31 +59,28 @@ export async function joinRoom(req: Request, res: Response) {
   }
 
   // Obtiene el ID real de la sala de RTDB desde FireStore
-  const { rtdbRoomId } = roomSnap.data() as { rtdbRoomId: string };
+  const { roomIdReal } = roomSnap.data() as { roomIdReal: string };
 
-  const playersRef = rtdb.ref(`rooms/${rtdbRoomId}`); // Crea referencia a los jugador en RTDB
+  const playersRef = rtdb.ref(`rooms/${roomIdReal}/currentGame`); // Crea referencia a los jugador en RTDB
   const playersSnap = await playersRef.get(); // Obtiene los jugadores actuales
   const players = playersSnap.val() || {};
 
-  const playerCount = Object.keys(players).length; // Cuenta cuantos jugadores hay
-
-  if (playerCount >= 2) {
+  if (Object.keys(players).length >= 2) {
     // Si hay 2 o mas, la sala esta llena
     return res.status(409).json({ error: "la sala esta llena" });
   }
 
-  const nameAlreadyTaken = Object.values(players).some(
-    // Verifica si el nombre ya esta en uso
+  const nameTaken = Object.values(players).some(
     (p: any) => p.name === userName
   );
 
-  if (nameAlreadyTaken) {
+  if (nameTaken) {
     return res.status(409).json({ error: "ese nombre ya esta en uso" });
   }
 
   const userId = nanoid(5); // Genera un nuevo Id unico para el jugador
 
-  await playersRef.set({
+  await playersRef.update({
     // Agrega el nuevo jugador a la sala en RTDB
     [userId]: {
       name: userName,
@@ -95,7 +92,7 @@ export async function joinRoom(req: Request, res: Response) {
 
   return res.json({
     userId,
-    roomIdReal: rtdbRoomId,
+    roomIdReal: roomIdReal,
     roomIdCorto,
   });
 }
@@ -236,18 +233,17 @@ export async function resetRounder(req: Request, res: Response) {
     }
     const players = snap.val();
 
-    const updates = Object.entries(players).map((playerId) => {
-      const playerRef = rtdb.ref(`rooms/${roomIdReal}/currentGame/${playerId}`);
-      return playerRef.update({
+    for (const playerId of Object.keys(players)) {
+      await baseRef.child(playerId).update({
         choice: "",
         start: false,
       });
-    });
-
-    await Promise.all(updates);
+    }
 
     return res.status(200).json({ message: "Reinicio completado" });
   } catch (err) {
-    return res.start(500).json({ error: "Error interno al ejecutar reinicio" });
+    return res
+      .status(500)
+      .json({ error: "Error interno al ejecutar reinicio" });
   }
 }

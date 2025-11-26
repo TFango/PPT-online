@@ -154,11 +154,10 @@ export const state = {
   async createRoom(userName: string) {
     // Crea una nueva sala de juego
     if (!userName) {
-      console.error("createRoom llamado sin nombre");
       throw new Error("Nombre requerido");
     }
 
-    const res = await fetch("/api/createRoom", {
+    const res = await fetch("/room/createRoom", {
       // Envia solicitud al servidor para crear sala
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -187,11 +186,11 @@ export const state = {
       throw new Error("roomCode y userName requeridos");
     }
 
-    const res = await fetch("/api/joinRoom", {
+    const res = await fetch("/room/joinRoom", {
       // Envia solicitud para unirse a la sala
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roomCode, userName }),
+      body: JSON.stringify({ roomIdCorto: roomCode, userName }),
     });
 
     if (!res.ok) {
@@ -218,108 +217,64 @@ export const state = {
   async sendStartSignal() {
     // Envia una señal de "estoy listo para jugar" a la base de datos
     const cs = this.getState();
-    const userId = cs.userId;
-    const roomIdReal = cs.roomIdReal;
+    const { userId, roomIdReal } = cs;
 
     if (!userId || !roomIdReal) {
       console.error("sendStartSignal: faltan userId o roomIdReal");
       return;
     }
 
-    const playerRef = ref(db, `rooms/${roomIdReal}/currentGame/${userId}`); // Crea la referencia a mi ubicacion en la base de datos
-
-    try {
-      await update(playerRef, {
-        // Actualiza la base de datos para indicar que estoy listo
-        start: true,
-      });
-      console.log(`start=true seteado para ${userId}`);
-    } catch (err) {
-      console.error("Error al enviar start:", err);
-      throw err;
-    }
+    await fetch("/room/setStart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, roomIdReal }),
+    });
   },
   async sendChoice(choice: Move) {
     const cs = this.getState();
-    const userId = cs.userId;
-    const roomIdReal = cs.roomIdReal;
+    const { userId, roomIdReal } = cs;
 
     if (!userId || !roomIdReal) {
       console.error("sendChoice: faltan userId o roomIdReal");
       return;
     }
 
-    if (!choice) {
-      console.error("sendChoice: falta choice");
-      return;
-    }
-
-    const playerRef = ref(db, `rooms/${roomIdReal}/currentGame/${userId}`);
-
-    try {
-      await update(playerRef, {
-        choice,
-      });
-      console.log(`choice=${choice} enviada para user=${userId}`);
-    } catch (err) {
-      console.error("Error al enviar choice:", err);
-      throw err;
-    }
+    await fetch("/room/setChoice", {
+      method: "POST",
+      headers: { "Content-Type": "application/jsno" },
+      body: JSON.stringify({ userId, roomIdReal, choice }),
+    });
   },
   async resetGame() {
     // Reinicia el juego para una nueva ronda
     const cs = this.getState();
-    const roomIdReal = cs.roomIdReal;
+    const { roomIdReal } = cs;
 
     if (!roomIdReal) {
       console.error("resetGame: falta roomIdReal");
       return;
     }
 
-    const currentGameRef = ref(db, `rooms/${roomIdReal}/currentGame`); // Crea referencia al juego actual en la base de datos
-    const snapshot = await get(currentGameRef); // Obtiene los datos actuales del juego
-
-    if (!snapshot.exists()) {
-      // Verifica si existe el juego
-      console.warn("resetGame: no hay currentGame para resetear");
-      return;
-    }
-
-    const players = snapshot.val(); // Convierte los datos a objeto Javascript
-
-    for (const [playerId, playerData] of Object.entries(players)) {
-      // Recorre TODOS los jugadores del juego
-      const playerRef = ref(db, `rooms/${roomIdReal}/currentGame/${playerId}`); // Crea referencia a cada jugador individual
-
-      try {
-        await update(playerRef, {
-          // Resetea el estado del jugador
-          choice: "",
-          start: false,
-        });
-      } catch (err) {
-        console.error(`Error al resetear al jugador ${playerId}: `, err);
-      }
-    }
-    console.log("resetGame: ronda reiniciada correctamente.");
+    await fetch("/room/resetRounder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roomIdReal }),
+    });
   },
   async saveMatchResult() {
     // Guarda el resultado de la partida en el servidor
     const cs = this.getState();
-    const roomIdReal = cs.roomIdReal;
-    const userChoice = cs.currentChoice;
-    const opponentChoice = cs.opponentChoice;
+    const { roomIdReal, currentChoice, opponentChoice, score } = cs;
 
-    if (!roomIdReal || !userChoice || !opponentChoice) {
-      console.error("saveMatchResult: faltan datos");
-      return;
-    }
-
-    const res = await fetch("/api/resultMoves", {
+    const res = await fetch("/game/resultMoves", {
       // Envia el resultado al servidor
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roomIdReal, userChoice, opponentChoice }),
+      body: JSON.stringify({
+        roomIdReal,
+        userChoice: currentChoice,
+        opponentChoice,
+      }),
     });
 
     if (!res.ok) {
@@ -327,18 +282,13 @@ export const state = {
     }
 
     const data = await res.json();
-    const newScore = data.score; // Toma el nuevo puntaje
 
-    if (!newScore) {
-      console.error("saveMatchResult: score inválido del backend:", data);
-      return;
-    }
+    if (data.win === "user") score.me++;
+    if (data.win === "opponent") score.opponent++;
 
     this.setState({
-      // Actualiza el estado local con el nuevo puntaje
-      score: newScore,
+      winner: data.win,
+      score,
     });
-
-    console.log("Nuevo score guardado:", newScore);
   },
 };

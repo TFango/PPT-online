@@ -23,7 +23,7 @@ type RtdbGame = {
   };
 };
 
-type Score = { me: number; opponent: number }; // Estructura para llevar el puntaje
+type Score = { owner: number; guest: number }; // Estructura para llevar el puntaje
 const GAME_KEY = "game-state";
 
 export const state = {
@@ -47,8 +47,8 @@ export const state = {
     winner: "" as Winner | "",
 
     score: {
-      me: 0,
-      opponent: 0,
+      owner: 0,
+      guest: 0,
     } as Score,
   },
   listeners: [] as Array<() => void>,
@@ -63,12 +63,6 @@ export const state = {
 
       this.data.userName = parsed.userName || "";
       this.data.userId = parsed.userId || "";
-      this.data.opponentName = parsed.opponentName || "";
-      this.data.roomIdReal = parsed.roomIdReal || "";
-      this.data.roomIdCorto = parsed.roomIdCorto || "";
-      this.data.owner = parsed.owner || false;
-
-      this.data.score = parsed.score || { me: 0, opponent: 0 };
     }
   },
   getState() {
@@ -76,6 +70,7 @@ export const state = {
     return this.data;
   },
   setState(newState: Partial<typeof this.data>) {
+    const old = JSON.stringify(this.data);
     // Actualiza el estado con nuevos datos : Partial<> permite pasar solo lo que queres actualizar
     this.data = {
       // Combina el estado actual con el nuevo estado
@@ -90,14 +85,12 @@ export const state = {
       roomIdReal: this.data.roomIdReal,
       roomIdCorto: this.data.roomIdCorto,
       owner: this.data.owner,
-      score: this.data.score,
     };
 
     localStorage.setItem(GAME_KEY, JSON.stringify(persist)); // Guarda en el almacenamiento local del navegador
 
-    for (const cb of this.listeners) {
-      // Ejecuta todas las funciones de callbck registradas
-      cb();
+    if (JSON.stringify(this.data) !== old) {
+      for (const cb of this.listeners) cb();
     }
   },
   subscribe(callbakc: () => void) {
@@ -145,10 +138,15 @@ export const state = {
 
       if (!data) return; // Si no hay datos, no hace nada
 
+      const mergedGame = {
+        ...this.data.rtdbData?.game,
+        ...data,
+      };
+
       this.setState({
         //Actualiza el estado con los datos nuevos
         rtdbData: {
-          game: data || {}, // Datos del juego
+          game: mergedGame, // Datos del juego
         },
       });
 
@@ -270,38 +268,39 @@ export const state = {
     });
   },
   async saveMatchResult() {
-    // Guarda el resultado de la partida en el servidor
     const cs = this.getState();
-    const { roomIdReal, currentChoice, opponentChoice, score } = cs;
-    let winner: Winner;
-
+  
     const res = await fetch("/game/resultMoves", {
-      // Envia el resultado al servidor
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        roomIdReal,
-        userChoice: currentChoice,
-        opponentChoice,
+        roomIdCorto: cs.roomIdCorto,
+        userChoice: cs.currentChoice,
+        opponentChoice: cs.opponentChoice,
+        playerRole: cs.owner ? "owner" : "guest",
       }),
     });
 
-    if (!res.ok) {
-      throw new Error(`HTTP Error: ${res.status}`);
-    }
-
     const data = await res.json();
 
-    if (data.win === "user") winner = "me";
-    else if (data.win === "opponent") winner = "opponent";
-    else winner = "tie";
-
-    if (winner === "me") score.me++;
-    if (winner === "opponent") score.opponent++;
-
     this.setState({
-      winner,
-      score,
+      winner:
+        data.win === "user"
+          ? "me"
+          : data.win === "opponent"
+          ? "opponent"
+          : "tie",
+      score: data.score,
     });
+  },
+  determineWinner(me: Move, op: Move): Winner {
+    const win: Record<Move, Move> = {
+      piedra: "tijera",
+      tijera: "papel",
+      papel: "piedra",
+    };
+
+    if (me === op) return "tie";
+    return win[me] === op ? "me" : "opponent";
   },
 };

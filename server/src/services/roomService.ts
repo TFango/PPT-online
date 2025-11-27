@@ -23,6 +23,10 @@ export async function createRoom(req: Request, res: Response) {
       roomIdReal,
       roomIdCorto,
       createdAt: Timestamp.now(),
+      score: {
+        owner: 0,
+        guest: 0,
+      },
     });
 
     // Crea la referencia del jugador en la base de datos en tiempo real
@@ -46,6 +50,7 @@ export async function createRoom(req: Request, res: Response) {
 }
 
 export async function joinRoom(req: Request, res: Response) {
+  console.log("✅ JOIN ROOM recibido:", req.body); // ← Esto debería aparecer
   const { roomIdCorto, userName } = req.body;
 
   if (!roomIdCorto || !userName) {
@@ -61,40 +66,45 @@ export async function joinRoom(req: Request, res: Response) {
   // Obtiene el ID real de la sala de RTDB desde FireStore
   const { roomIdReal } = roomSnap.data() as { roomIdReal: string };
 
-  const playersRef = rtdb.ref(`rooms/${roomIdReal}/currentGame`); // Crea referencia a los jugador en RTDB
-  const playersSnap = await playersRef.get(); // Obtiene los jugadores actuales
-  const players = playersSnap.val() || {};
+  try {
+    const playersRef = rtdb.ref(`rooms/${roomIdReal}/currentGame`); // Crea referencia a los jugador en RTDB
+    const playersSnap = await playersRef.get(); // Obtiene los jugadores actuales
+    const players = playersSnap.val() || {};
 
-  if (Object.keys(players).length >= 2) {
-    // Si hay 2 o mas, la sala esta llena
-    return res.status(409).json({ error: "la sala esta llena" });
+    if (Object.keys(players).length >= 2) {
+      // Si hay 2 o mas, la sala esta llena
+      return res.status(409).json({ error: "la sala esta llena" });
+    }
+
+    const nameTaken = Object.values(players).some(
+      (p: any) => p.name === userName
+    );
+
+    if (nameTaken) {
+      return res.status(409).json({ error: "ese nombre ya esta en uso" });
+    }
+
+    const userId = nanoid(5); // Genera un nuevo Id unico para el jugador
+
+    await playersRef.update({
+      // Agrega el nuevo jugador a la sala en RTDB
+      [userId]: {
+        name: userName,
+        start: false,
+        choice: "",
+        online: true,
+      },
+    });
+
+    return res.json({
+      userId,
+      roomIdReal: roomIdReal,
+      roomIdCorto,
+    });
+  } catch (err) {
+    console.error("Error en joinRoom:", err);
+    res.status(500).json({ err: err.message });
   }
-
-  const nameTaken = Object.values(players).some(
-    (p: any) => p.name === userName
-  );
-
-  if (nameTaken) {
-    return res.status(409).json({ error: "ese nombre ya esta en uso" });
-  }
-
-  const userId = nanoid(5); // Genera un nuevo Id unico para el jugador
-
-  await playersRef.update({
-    // Agrega el nuevo jugador a la sala en RTDB
-    [userId]: {
-      name: userName,
-      start: false,
-      choice: "",
-      online: true,
-    },
-  });
-
-  return res.json({
-    userId,
-    roomIdReal: roomIdReal,
-    roomIdCorto,
-  });
 }
 
 export async function setStart(req: Request, res: Response) {

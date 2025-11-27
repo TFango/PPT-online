@@ -10,14 +10,6 @@ export function resultPage(root: HTMLElement) {
   const cs = state.getState();
   const winner = cs.winner;
 
-  if (winner === "tie") {
-    setTimeout(() => {
-      state.resetGame();
-      goTo("/playPage");
-    }, 1500);
-    return;
-  }
-
   const view = resultLayout();
   root.appendChild(view);
 
@@ -29,16 +21,20 @@ export function resultPage(root: HTMLElement) {
     slotStar.replaceWith(star.el);
   }
 
+  const { owner, guest } = cs.score;
+  const myScore = cs.owner ? owner : guest;
+  const oppScore = cs.owner ? guest : owner;
+
   const meScore = view.querySelector<HTMLParagraphElement>("#meScore");
   if (meScore) {
-    meScore.textContent = `${cs.userName} : ${cs.score.me}`;
+    meScore.textContent = `${cs.userName} : ${myScore}`;
   }
 
   const opponentScore =
     view.querySelector<HTMLParagraphElement>("#opponentScore");
 
   if (opponentScore) {
-    opponentScore.textContent = `${cs.opponentName} : ${cs.score.opponent}`;
+    opponentScore.textContent = `${cs.opponentName} : ${oppScore}`;
   }
 
   const slotBtn = view.querySelector<HTMLDivElement>("#slot-btn");

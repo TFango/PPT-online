@@ -8,6 +8,10 @@ export function lobbyPage(root: HTMLElement) {
   root.innerHTML = "";
   const cs = state.getState();
 
+  const { owner, guest } = cs.score;
+  const myScore = cs.owner ? owner : guest;
+  const oppScore = cs.owner ? guest : owner;
+
   const view = lobbyLayout();
   root.appendChild(view);
 
@@ -26,9 +30,9 @@ export function lobbyPage(root: HTMLElement) {
   if (slotHeader) {
     startHeader = createHeader({
       userName: cs.userName,
-      userScore: cs.score.me,
+      userScore: myScore,
       opponentName: cs.opponentName,
-      opponentScore: cs.score.opponent,
+      opponentScore: oppScore,
       salaId: cs.roomIdCorto,
     });
     slotHeader.replaceWith(startHeader.el);
@@ -40,7 +44,7 @@ export function lobbyPage(root: HTMLElement) {
     const newCs = state.getState();
     const players = Object.keys(newCs.rtdbData.game);
 
-    startHeader.updateScore(newCs.score.me, newCs.score.opponent);
+    startHeader.updateScore(myScore, oppScore);
     startHeader.updateSala(newCs.roomIdCorto);
     startHeader.updateOpponentName(newCs.opponentName);
     code.textContent = newCs.roomIdCorto;

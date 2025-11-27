@@ -34,9 +34,11 @@ export function namePage(root: HTMLElement) {
         const cs = state.getState();
 
         try {
-          if (cs.roomIdCorto) {
+          if (cs.roomIdCorto && cs.roomIdCorto.trim() !== "") {
+            console.log("🔍 Intentando JOIN a sala:", cs.roomIdCorto);
             await state.joinRoom(cs.roomIdCorto, name);
           } else {
+            console.log("🔍 Creando NUEVA sala");
             await state.createRoom(name);
           }
           state.listenRTDB();

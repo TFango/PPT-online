@@ -10,15 +10,24 @@ export function instructionPage(root: HTMLElement) {
 
   const view = instructionLayout();
   root.appendChild(view);
-  const cs = state.getState();
 
+  const cs = state.getState();
+  const { owner, guest } = cs.score;
+
+  const myScore = cs.owner ? owner : guest;
+  const oppScore = cs.owner ? guest : owner;
+
+  let unsubscribe: (() => void) | null = null;
+  let redirected = false; // ← Flag para evitar múltiples redirecciones
+
+  let startHeader: ReturnType<typeof createHeader> | null = null;
   const slotHeader = view.querySelector<HTMLDivElement>("#slot-header");
   if (slotHeader) {
-    const startHeader = createHeader({
+     startHeader = createHeader({
       userName: cs.userName,
-      userScore: cs.score.me,
+      userScore: myScore,
       opponentName: cs.opponentName,
-      opponentScore: cs.score.opponent,
+      opponentScore: oppScore,
       salaId: cs.roomIdCorto,
     });
     slotHeader.replaceWith(startHeader.el);
@@ -32,7 +41,6 @@ export function instructionPage(root: HTMLElement) {
       },
       async () => {
         await state.sendStartSignal();
-        goTo("/waitingPage");
       }
     );
     slotBtn.replaceWith(startBtn.el);
@@ -44,22 +52,47 @@ export function instructionPage(root: HTMLElement) {
     slotLogos.replaceWith(startLogos.el);
   }
 
-  state.subscribe(() => {
-    const cs = state.getState();
-    const players = cs.rtdbData.game;
+  unsubscribe = state.subscribe(() => {
+    if (redirected) return; // ← Evitar redirecciones múltiples
 
-    const my = players[cs.userId];
-    const opponentId = Object.keys(players).find((id) => id !== cs.userId);
+    const newCs = state.getState();
+
+    const { owner, guest } = newCs.score;
+
+    const myScore = newCs.owner ? owner : guest;
+    const oppScore = newCs.owner ? guest : owner;
+
+    if (startHeader) {
+      startHeader.updateScore(myScore, oppScore) ;
+      startHeader.updateOpponentName(newCs.opponentName);
+      startHeader.updateSala(newCs.roomIdCorto);
+    }
+
+    const players = newCs.rtdbData?.game;
+
+    if (!players) return;
+
+    const my = players[newCs.userId];
+    const opponentId = Object.keys(players).find((id) => id !== newCs.userId);
     const opponent = opponentId ? players[opponentId] : null;
 
-    if (!opponent) return;
-
-    if (my.start && !opponent.start) {
-      goTo("/waitingPage");
-    }
+    if (!my || !opponent) return;
 
     if (my.start && opponent.start) {
+      redirected = true;
+      if (unsubscribe) unsubscribe();
       goTo("/playPage");
     }
+
+    if (my.start && !opponent.start) {
+      redirected = true;
+      if (unsubscribe) unsubscribe();
+      goTo("/waitingPage");
+    }
   });
+
+  return () => {
+    console.log("🧹 Cleanup instructionPage");
+    if (unsubscribe) unsubscribe();
+  };
 }

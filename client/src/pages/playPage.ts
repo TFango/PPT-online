@@ -12,6 +12,7 @@ export function playPage(root: HTMLElement) {
 
   let myMove: "piedra" | "papel" | "tijera" | "" = "";
   let navigate = false;
+  let sentMove = false; // ← evita enviar dos veces
 
   const slotHands = view.querySelector<HTMLDivElement>("#slot-hands");
   if (slotHands) {
@@ -34,7 +35,10 @@ export function playPage(root: HTMLElement) {
         return;
       }
 
-      await state.sendChoice(myMove);
+      if (!sentMove) {
+        sentMove = true;
+        await state.sendChoice(myMove);
+      }
     });
 
     startCount.start(3000);
@@ -53,11 +57,16 @@ export function playPage(root: HTMLElement) {
     if (!opponent) return;
 
     if (my.choice && opponent.choice) {
+      if (!cs.currentChoice || !cs.opponentChoice) {
+        console.log("⏳ Aún no están ambas elecciones, esperando...");
+        return;
+      }
+
       navigate = true;
 
       await state.saveMatchResult();
-      goTo("/wachIconPage");
       unsubscribe();
+      goTo("/wachIconPage");
     }
   });
 }

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 
-import { roomRouter } from "./routes/roomRoutes";
+import { roomRouter } from "./routes/roomRouter";
 import { gameRouter } from "./routes/gameRouter";
 
 const app = express();

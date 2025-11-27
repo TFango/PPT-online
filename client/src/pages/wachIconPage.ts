@@ -37,6 +37,13 @@ export function wachIconPage(root: HTMLElement) {
   }
 
   setTimeout(() => {
-    goTo("/resultPage");
+    if (cs.winner === "tie") {
+      console.log("Empate");
+      state.resetGame();
+      goTo("/instructionPage");
+    } else {
+      console.log("Ganadores");
+      goTo("/resultPage");
+    }
   }, 2000);
 }

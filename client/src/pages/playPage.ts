@@ -11,12 +11,12 @@ export function playPage(root: HTMLElement) {
   root.appendChild(view);
 
   let myMove: "piedra" | "papel" | "tijera" | "" = "";
+  let navigate = false;
 
   const slotHands = view.querySelector<HTMLDivElement>("#slot-hands");
   if (slotHands) {
     const hands = createHands((move) => {
       myMove = move;
-      console.log("Elegiste: ", move);
     });
     slotHands.replaceWith(hands.el);
   }
@@ -26,20 +26,38 @@ export function playPage(root: HTMLElement) {
     const startCount = createCount();
     slotCount.replaceWith(startCount.el);
 
-    startCount.el.addEventListener("done", () => {
+    startCount.el.addEventListener("done", async () => {
       console.log("Termino el contador");
 
       if (!myMove) {
-        console.log("No elegiste → pierde automáticamente");
-        state.sendChoice("papel"); // definimos qué hacer si no elige
-      } else {
-        state.sendChoice(myMove);
+        goTo("/playPage");
+        return;
       }
+
+      await state.sendChoice(myMove);
     });
+
     startCount.start(3000);
   }
 
-  setTimeout(() => {
-    goTo("/wachIconPage");
-  }, 3000);
+  const unsubscribe = state.subscribe(async () => {
+    if (navigate) return;
+
+    const cs = state.getState();
+    const players = cs.rtdbData.game;
+
+    const my = players[cs.userId];
+    const opponentId = Object.keys(players).find((id) => id !== cs.userId);
+    const opponent = opponentId ? players[opponentId] : null;
+
+    if (!opponent) return;
+
+    if (my.choice && opponent.choice) {
+      navigate = true;
+
+      await state.saveMatchResult();
+      goTo("/wachIconPage");
+      unsubscribe();
+    }
+  });
 }

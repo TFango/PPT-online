@@ -38,14 +38,15 @@ export function lobbyPage(root: HTMLElement) {
     if (!startHeader) return;
 
     const newCs = state.getState();
+    const players = Object.keys(newCs.rtdbData.game);
 
     startHeader.updateScore(newCs.score.me, newCs.score.opponent);
     startHeader.updateSala(newCs.roomIdCorto);
     startHeader.updateOpponentName(newCs.opponentName);
     code.textContent = newCs.roomIdCorto;
-  });
 
-  setTimeout(() => {
-    goTo("/instructionPage");
-  }, 2000);
+    if (players.length === 2) {
+      goTo("/instructionPage");
+    }
+  });
 }

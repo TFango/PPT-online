@@ -103,6 +103,10 @@ export const state = {
   subscribe(callbakc: () => void) {
     // Registra una funcion para ser notificada cuando cambie el estado
     this.listeners.push(callbakc);
+
+    return () => {
+      this.listeners = this.listeners.filter((cb) => cb !== callbakc);
+    };
   },
   //Gracias es ta funcion, los calculos para saber la eleccion de cada jugador son mas faciles, ya que en la base de datos son datos crudos, esto los convierte en datos utiles
   async computeDerivedData() {
@@ -178,6 +182,8 @@ export const state = {
       roomIdCorto: data.roomIdCorto,
       owner: true,
     });
+
+    this.listenRTDB();
   },
   async joinRoom(roomCode: string, userName: string) {
     // Une a un usuario a una sala existente
@@ -213,6 +219,8 @@ export const state = {
       roomIdCorto: data.roomIdCorto,
       owner: false,
     });
+
+    this.listenRTDB();
   },
   async sendStartSignal() {
     // Envia una señal de "estoy listo para jugar" a la base de datos
@@ -241,7 +249,7 @@ export const state = {
 
     await fetch("/room/setChoice", {
       method: "POST",
-      headers: { "Content-Type": "application/jsno" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, roomIdReal, choice }),
     });
   },
@@ -265,6 +273,7 @@ export const state = {
     // Guarda el resultado de la partida en el servidor
     const cs = this.getState();
     const { roomIdReal, currentChoice, opponentChoice, score } = cs;
+    let winner: Winner;
 
     const res = await fetch("/game/resultMoves", {
       // Envia el resultado al servidor
@@ -283,11 +292,15 @@ export const state = {
 
     const data = await res.json();
 
-    if (data.win === "user") score.me++;
-    if (data.win === "opponent") score.opponent++;
+    if (data.win === "user") winner = "me";
+    else if (data.win === "opponent") winner = "opponent";
+    else winner = "tie";
+
+    if (winner === "me") score.me++;
+    if (winner === "opponent") score.opponent++;
 
     this.setState({
-      winner: data.win,
+      winner,
       score,
     });
   },

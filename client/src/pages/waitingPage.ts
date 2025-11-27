@@ -38,13 +38,20 @@ export function waitingPage(root: HTMLElement) {
     if (!startHeader) return;
 
     const newCs = state.getState();
+    const players = cs.rtdbData.game;
+
+    const my = players[cs.userId];
+    const opponentId = Object.keys(players).find((id) => id !== cs.userId);
+    const opponent = opponentId ? players[opponentId] : null;
+
+    if (!opponent) return;
+
+    if (my.start && opponent.start) {
+      goTo("/playPage");
+    }
 
     startHeader.updateScore(newCs.score.me, newCs.score.opponent);
     startHeader.updateSala(newCs.roomIdCorto);
     startHeader.updateOpponentName(newCs.opponentName);
   });
-
-  setTimeout(() => {
-    goTo("/playPage");
-  }, 2000);
 }

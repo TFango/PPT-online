@@ -6,17 +6,22 @@ import { createStar } from "../components/star";
 
 export function resultPage(root: HTMLElement) {
   root.innerHTML = "";
+
   const cs = state.getState();
   const winner = cs.winner;
+
+  if (winner === "tie") {
+    setTimeout(() => {
+      state.resetGame();
+      goTo("/playPage");
+    }, 1500);
+    return;
+  }
 
   const view = resultLayout();
   root.appendChild(view);
 
-  if (winner === "me") {
-    view.classList.add("result--win");
-  } else if (winner === "opponent") {
-    view.classList.add("result--lose");
-  }
+  view.classList.add(winner === "me" ? "result--win" : "result--lose");
 
   const slotStar = view.querySelector("#slot-star");
   if (slotStar) {
@@ -39,6 +44,7 @@ export function resultPage(root: HTMLElement) {
   const slotBtn = view.querySelector<HTMLDivElement>("#slot-btn");
   if (slotBtn) {
     const startBtn = createButton({ text: "Volver a jugar" }, () => {
+      state.resetGame();
       goTo("/waitingPage");
     });
     slotBtn.replaceWith(startBtn.el);

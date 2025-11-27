@@ -30,7 +30,8 @@ export function instructionPage(root: HTMLElement) {
       {
         text: "¡Jugar!",
       },
-      () => {
+      async () => {
+        await state.sendStartSignal();
         goTo("/waitingPage");
       }
     );
@@ -42,4 +43,23 @@ export function instructionPage(root: HTMLElement) {
     const startLogos = createLogos();
     slotLogos.replaceWith(startLogos.el);
   }
+
+  state.subscribe(() => {
+    const cs = state.getState();
+    const players = cs.rtdbData.game;
+
+    const my = players[cs.userId];
+    const opponentId = Object.keys(players).find((id) => id !== cs.userId);
+    const opponent = opponentId ? players[opponentId] : null;
+
+    if (!opponent) return;
+
+    if (my.start && !opponent.start) {
+      goTo("/waitingPage");
+    }
+
+    if (my.start && opponent.start) {
+      goTo("/playPage");
+    }
+  });
 }

@@ -7,7 +7,7 @@ admin.initializeApp({
     client_email: process.env.FIREBASE_CLIENT_EMAIL,
     private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
   } as any),
-  databaseURL: "https://ppt-online-de510-default-rtdb.firebaseio.com",
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
 export const firestore = admin.firestore();

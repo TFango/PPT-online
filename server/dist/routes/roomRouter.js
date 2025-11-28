@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.roomRouter = void 0;
+const express_1 = require("express");
+const roomService_1 = require("../services/roomService");
+exports.roomRouter = (0, express_1.Router)();
+exports.roomRouter.post("/createRoom", roomService_1.createRoom);
+exports.roomRouter.post("/joinRoom", roomService_1.joinRoom);
+exports.roomRouter.post("/setStart", roomService_1.setStart);
+exports.roomRouter.post("/setChoice", roomService_1.setChoice);
+exports.roomRouter.post("/resetRounder", roomService_1.resetRounder);

@@ -28,10 +28,14 @@ export function playPage(root: HTMLElement) {
     slotCount.replaceWith(startCount.el);
 
     startCount.el.addEventListener("done", async () => {
-      console.log("Termino el contador");
+      const cs = state.getState();
+      const players = cs.rtdbData.game;
+      const myPlayer = players[cs.userId];
 
       if (!myMove) {
-        goTo("/playPage");
+
+        await state.resetGame();
+        goTo("/instructionPage");
         return;
       }
 

@@ -1,7 +1,7 @@
-import { Timestamp } from "@google-cloud/firestore";
 import { firestore, rtdb } from "./firebase";
 import { Request, Response } from "express";
 import { nanoid } from "nanoid";
+import admin from "firebase-admin";
 import { error } from "console";
 
 const roomCollection = firestore.collection("rooms");
@@ -22,7 +22,7 @@ export async function createRoom(req: Request, res: Response) {
       owner: userName,
       roomIdReal,
       roomIdCorto,
-      createdAt: Timestamp.now(),
+      createdAt: admin.firestore.Timestamp.now(),
       score: {
         owner: 0,
         guest: 0,
